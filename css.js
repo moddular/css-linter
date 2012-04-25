@@ -1,0 +1,146 @@
+#!/usr/bin/env node
+
+var args = (function() {
+	var args = {};
+	process.argv.slice(2).forEach(function(arg) {
+		if (arg.indexOf('--') === 0) {
+			arg = arg.replace(/^--/, '');
+			
+			if (arg.indexOf('=') > 0) {
+				args[arg.split('=')[0]] = arg.split('=')[1];
+			} else {
+				args[arg] = true;
+			}
+		}
+	});
+	return args;
+})();
+
+// ignore files we don't have control over
+var excluded = [
+	'polopoly/stylesheets',
+	'polopoly/help',
+	'rendertools',
+	'_preview',
+	'ckeditor',
+	'jquery-ui',
+	'compiled',
+	'greenfield',
+	'yui.css',
+	'reset.css'
+];
+
+var IS_WARNING = 1;
+var IS_ERROR = 2;
+
+// if the list of rules to run isn't specified via the command line
+// we'll use these default ones
+var defaultRules = {
+	'color-shorthand': IS_ERROR,
+	'compatible-vendor-prefixes': IS_ERROR,
+	'default-values': IS_WARNING,
+	'empty-rules': IS_ERROR,
+	'errors': IS_ERROR,
+	'fallback-colors': IS_ERROR,
+	'font-size-should-use-percentages': IS_ERROR,
+	'gradients': IS_ERROR,
+	'import': IS_ERROR,
+	'important': IS_WARNING,
+	'known-properties': IS_ERROR,
+	'one-property-per-line': IS_ERROR,
+	'properties-should-be-lowercase': IS_ERROR,
+	'shorthand': IS_ERROR,
+	'url-values-should-not-be-quoted': IS_ERROR,
+	'vendor-prefix': IS_ERROR,
+	'well-formed-selectors': IS_ERROR,
+	'zero-units': IS_ERROR
+};
+
+
+// ../path/to/validator/css.js --help display this message and exit
+if (args.help) {
+	(function() {
+		var rules = {};
+		rules[IS_ERROR] = [];
+		rules[IS_WARNING] = [];
+		
+		Object.keys(defaultRules).forEach(function(rule) {
+			rules[defaultRules[rule]].push(rule);
+		});
+		
+		console.log('\nYou can control which validation rules will be run via the command line.\nThis is the full list of rules available\n');
+		console.log('/path/to/css.js --errors=' + rules[IS_ERROR].join(',') + ' --warnings=' + rules[IS_WARNING].join(','));
+		console.log('\nYou can remove any of these to narrow down the list of errors displayed');
+		console.log('So if you wanted to only test the color-shorthand rule you could use\n');
+		console.log('/path/to/css.js --errors=color-shorthand\n');
+		console.log('Running without the --errors or --warnings options will run all rules\n');
+		console.log('Running with the --blame option will enable checking git blame to record who is responsible for each error\n');
+	})();
+	process.exit(0);
+}
+
+// search command line options to see if rules have been specified by 
+// --files= or --warnings= if nothing is found there return the default rules
+var rules = (function() {
+	var rules = {},
+		rule = null,
+		hasErrors = false,
+		hasWarnings = false,
+		addRules = function(type, value) {
+			if (args[type] && typeof args[type] === 'string') {
+				args[type].split(',').forEach(function(rule) {
+					rules[rule] = value;
+				});
+				return true;
+			}
+			return false;
+		};
+	
+	hasErrors = addRules('errors', IS_ERROR);
+	hasWarnings = addRules('warnings', IS_WARNING);
+	if (hasErrors || hasWarnings) {
+		return rules;
+	}
+	
+	Object.keys(defaultRules).forEach(function(rule) {
+		rules[rule] = defaultRules[rule];
+	});
+	return rules;
+})();
+
+
+(function(lint, finder, fs, reporter) {
+	var paths = [],
+		status = 0;
+	
+	// load our custom rules and add them to csslint
+	require('./lib/rules').forEach(function(rule) {
+		lint.addRule(rule);
+	});
+	
+	// get a list of all files that don't match the excluded list
+	finder.on('file', function(path) {
+		if (excluded.reduce(function(prev, current) { return prev && path.indexOf(current) === -1}, path.match(/\.css$/))) {
+			paths.push(path);
+			reporter.loadFile(path);
+		}
+	});
+	finder.on('end', function() {
+		paths.map(function(path) {
+			fs.readFile(path, 'utf8', function(err, data) {
+				if (!err) {
+					lint.verify(data, rules).messages.forEach(function(message) {
+						status = reporter.record(message, path) || status;
+					});
+				} else {
+					console.log(err);
+				}
+				if (path === paths[paths.length - 1]) {
+					reporter.summarise();
+					process.exit(status);
+				}
+			});
+		});
+	});
+})(require('csslint').CSSLint, require('findit').find(process.cwd()), require('fs'), require('./lib/reporter')(args));
+
