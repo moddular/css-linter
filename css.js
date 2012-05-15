@@ -24,7 +24,9 @@ var excluded = [
 	'_preview',
 	'ckeditor',
 	'jquery-ui',
+	'css/jquery',
 	'compiled',
+	'css/commons',
 	'greenfield',
 	'yui.css',
 	'reset.css'
@@ -44,12 +46,15 @@ var defaultRules = {
 	'fallback-colors': IS_ERROR,
 	'font-size-should-use-percentages': IS_ERROR,
 	'gradients': IS_ERROR,
+	'gradient-ordering': IS_ERROR,
 	'import': IS_ERROR,
 	'important': IS_WARNING,
 	'known-properties': IS_ERROR,
 	'one-property-per-line': IS_ERROR,
 	'properties-should-be-lowercase': IS_ERROR,
+	'property-ordering': IS_ERROR,
 	'shorthand': IS_ERROR,
+	'text-indent': IS_ERROR,
 	'url-values-should-not-be-quoted': IS_ERROR,
 	'vendor-prefix': IS_ERROR,
 	'well-formed-selectors': IS_ERROR,
@@ -111,7 +116,8 @@ var rules = (function() {
 
 (function(lint, finder, fs, reporter) {
 	var paths = [],
-		status = 0;
+		status = 0,
+		count = 0;
 	
 	// load our custom rules and add them to csslint
 	require('./lib/rules').forEach(function(rule) {
@@ -120,7 +126,7 @@ var rules = (function() {
 	
 	// get a list of all files that don't match the excluded list
 	finder.on('file', function(path) {
-		if (excluded.reduce(function(prev, current) { return prev && path.indexOf(current) === -1}, path.match(/\.css$/))) {
+		if (excluded.reduce(function(prev, current) { return prev && path.indexOf(current) === -1; }, path.match(/\.css$/))) {
 			paths.push(path);
 			reporter.loadFile(path);
 		}
@@ -135,12 +141,12 @@ var rules = (function() {
 				} else {
 					console.log(err);
 				}
-				if (path === paths[paths.length - 1]) {
+				if (++count === paths.length) {
 					reporter.summarise();
 					process.exit(status);
 				}
 			});
 		});
 	});
-})(require('csslint').CSSLint, require('findit').find(process.cwd()), require('fs'), require('./lib/reporter')(args));
+})(require('csslint').CSSLint, require('findit').find(args.path || process.cwd()), require('fs'), require('./lib/reporter')(args));
 
