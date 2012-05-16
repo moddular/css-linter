@@ -132,21 +132,27 @@ var rules = (function() {
 		}
 	});
 	finder.on('end', function() {
-		paths.map(function(path) {
-			fs.readFile(path, 'utf8', function(err, data) {
-				if (!err) {
-					lint.verify(data, rules).messages.forEach(function(message) {
-						status = reporter.record(message, path) || status;
+		setTimeout(function() {
+			if (reporter.hasLoaded(paths.length)) {
+				paths.map(function(path) {
+					fs.readFile(path, 'utf8', function(err, data) {
+						if (!err) {
+							lint.verify(data, rules).messages.forEach(function(message) {
+								status = reporter.record(message, path) || status;
+							});
+						} else {
+							console.log(err);
+						}
+						if (++count === paths.length) {
+							reporter.summarise();
+							process.exit(status);
+						}
 					});
-				} else {
-					console.log(err);
-				}
-				if (++count === paths.length) {
-					reporter.summarise();
-					process.exit(status);
-				}
-			});
-		});
+				});
+			} else {
+				setTimeout(arguments.callee, 100);
+			}
+		}, 100);
 	});
 })(require('csslint').CSSLint, require('findit').find(args.path || process.cwd()), require('fs'), require('./lib/reporter')(args));
 
