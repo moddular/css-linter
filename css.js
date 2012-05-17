@@ -56,6 +56,7 @@ var defaultRules = {
 	'shorthand': IS_ERROR,
 	'text-indent': IS_ERROR,
 	'url-values-should-not-be-quoted': IS_ERROR,
+	'use-absolute-paths': IS_ERROR,
 	'vendor-prefix': IS_ERROR,
 	'well-formed-selectors': IS_ERROR,
 	'zero-units': IS_ERROR
