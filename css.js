@@ -133,17 +133,21 @@ var rules = (function() {
 		}
 	});
 	finder.on('end', function() {
+		// if we're running with the blame option it may take a moment for the git blame subprocesses to complete
 		setTimeout(function() {
 			if (reporter.hasLoaded(paths.length)) {
 				paths.map(function(path) {
 					fs.readFile(path, 'utf8', function(err, data) {
 						if (!err) {
+							// run all the validation rules
 							lint.verify(data, rules).messages.forEach(function(message) {
+								// reporter.record will return 0 for success and 1 if there was an error
 								status = reporter.record(message, path) || status;
 							});
 						} else {
 							console.log(err);
 						}
+						// and we're done. exit with a non-zero status if there are any errors to report
 						if (++count === paths.length) {
 							reporter.summarise();
 							process.exit(status);
