@@ -49,6 +49,7 @@ var defaultRules = {
 	'gradient-ordering': IS_ERROR,
 	'import': IS_ERROR,
 	'important': IS_WARNING,
+	'indentation': IS_ERROR,
 	'known-properties': IS_ERROR,
 	'one-property-per-line': IS_ERROR,
 	'properties-should-be-lowercase': IS_ERROR,
