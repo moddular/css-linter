@@ -57,9 +57,9 @@ var defaultRules = {
 	'shorthand': IS_ERROR,
 	'text-indent': IS_ERROR,
 	'url-values-should-not-be-quoted': IS_ERROR,
-	'use-absolute-paths': IS_ERROR,
+	/*'use-paths-relative-from-root': IS_ERROR,*/
 	'vendor-prefix': IS_ERROR,
-	'well-formed-selectors': IS_ERROR,
+	/*'well-formed-selectors': IS_ERROR,*/
 	'zero-units': IS_ERROR
 };
 
@@ -87,7 +87,7 @@ if (args.help) {
 }
 
 // search command line options to see if rules have been specified by 
-// --files= or --warnings= if nothing is found there return the default rules
+// --errors= or --warnings= if nothing is found there return the default rules
 var rules = (function() {
 	var rules = {},
 		rule = null,
@@ -115,25 +115,12 @@ var rules = (function() {
 	return rules;
 })();
 
-
 (function(lint, finder, fs, reporter) {
 	var paths = [],
 		status = 0,
 		count = 0;
-	
-	// load our custom rules and add them to csslint
-	require('./lib/rules').forEach(function(rule) {
-		lint.addRule(rule);
-	});
-	
-	// get a list of all files that don't match the excluded list
-	finder.on('file', function(path) {
-		if (excluded.reduce(function(prev, current) { return prev && path.indexOf(current) === -1; }, path.match(/\.css$/))) {
-			paths.push(path);
-			reporter.loadFile(path);
-		}
-	});
-	finder.on('end', function() {
+		
+	var validate = function() {
 		// if we're running with the blame option it may take a moment for the git blame subprocesses to complete
 		setTimeout(function() {
 			if (reporter.hasLoaded(paths.length)) {
@@ -159,6 +146,39 @@ var rules = (function() {
 				setTimeout(arguments.callee, 100);
 			}
 		}, 100);
+	};
+	var isValidPath = function(path) {
+		return excluded.reduce(function(prev, current) {
+			return prev && path.indexOf(current) === -1;
+		}, path.match(/\.css$/));
+	};
+	
+	// load our custom rules and add them to csslint
+	require('./lib/rules').forEach(function(rule) {
+		lint.addRule(rule);
 	});
-})(require('csslint').CSSLint, require('findit').find(args.path || process.cwd()), require('fs'), require('./lib/reporter')(args));
+	
+	if (args.files) {
+		paths = args.files.split(',').map(function(val) {
+			return process.cwd() + '/' + val;
+		}).filter(function(path) {
+			return isValidPath(path);
+		});
+		paths.forEach(function(path) {
+			reporter.loadFile(path)
+		});
+		validate();
+	} else {
+		finder = finder.find(args.path || process.cwd());
+		// get a list of all files that don't match the excluded list
+		finder.on('file', function(path) {
+			if (isValidPath(path)) {
+				paths.push(path);
+				reporter.loadFile(path);
+			}
+		});
+		finder.on('end', validate);
+	}
+	
+})(require('csslint').CSSLint, require('findit'), require('fs'), require('./lib/reporter')(args));
 
