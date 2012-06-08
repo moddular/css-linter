@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+
+PATH_TO_LINT_SCRIPT = '/Library/Projects/css-linter/css.js'
+
+import sys, subprocess as sp
+
+def open_process(command):
+	return sp.Popen(command, shell=True, stdout=sp.PIPE)
+
+def close_procces(process, message='Failed to close subprocess'):
+	try:
+		process.stdout.close()
+	except IOError:
+		print message
+
+def read_process(process):
+	return process.communicate()[0].strip('\n')
+
+
+git_process = open_process('git diff --cached --name-status')
+git_result = read_process(git_process)
+close_procces(git_process)
+
+files_to_lint = [f.split('\t').pop() for f in git_result.split('\n') if not f.startswith('D') and f.endswith('.css')]
+
+if len(files_to_lint) == 0:
+	sys.exit(0)
+	
+lint_process = open_process('%s --files=%s' % (PATH_TO_LINT_SCRIPT, ','.join(files_to_lint)))
+lint_result = read_process(lint_process)
+close_procces(lint_process)
+
+if lint_process.returncode != 0:
+	print lint_result
+	print '\033[91mCommit was rejected\033[0m'
+
+sys.exit(lint_process.returncode)
