@@ -40,7 +40,7 @@ var IS_ERROR = 2;
 var defaultRules = {
 	/*'background-position': IS_ERROR,*/
 	/*'borders': IS_ERROR,*/
-	'color-shorthand': IS_ERROR,
+	/*'color-shorthand': IS_ERROR,*/
 	'compatible-vendor-prefixes': IS_ERROR,
 	'default-values': IS_WARNING,
 	'empty-rules': IS_ERROR,
