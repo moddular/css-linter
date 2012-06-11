@@ -38,6 +38,8 @@ var IS_ERROR = 2;
 // if the list of rules to run isn't specified via the command line
 // we'll use these default ones
 var defaultRules = {
+	/*'background-position': IS_ERROR,*/
+	/*'borders': IS_ERROR,*/
 	'color-shorthand': IS_ERROR,
 	'compatible-vendor-prefixes': IS_ERROR,
 	'default-values': IS_WARNING,
@@ -45,7 +47,7 @@ var defaultRules = {
 	'errors': IS_ERROR,
 	'fallback-colors': IS_ERROR,
 	'font-size-should-use-percentages': IS_ERROR,
-	'formatting': IS_ERROR,
+	/*'formatting': IS_ERROR,*/
 	'gradients': IS_ERROR,
 	'gradient-ordering': IS_ERROR,
 	'import': IS_ERROR,
