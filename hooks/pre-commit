@@ -26,7 +26,7 @@ def lint():
 	if len(files_to_lint) == 0:
 		return 0
 	
-	lint_process = open_process('%s --files=%s' % (PATH_TO_LINT_SCRIPT, ','.join(files_to_lint)))
+	lint_process = open_process('%s --blame --files=%s' % (PATH_TO_LINT_SCRIPT, ','.join(files_to_lint)))
 	lint_result = read_process(lint_process)
 	close_procces(lint_process)
 
