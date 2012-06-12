@@ -16,22 +16,24 @@ def close_procces(process, message='Failed to close subprocess'):
 def read_process(process):
 	return process.communicate()[0].strip('\n')
 
+def lint():
+	git_process = open_process('git diff --cached --name-status')
+	git_result = read_process(git_process)
+	close_procces(git_process)
 
-git_process = open_process('git diff --cached --name-status')
-git_result = read_process(git_process)
-close_procces(git_process)
+	files_to_lint = [f.split('\t').pop() for f in git_result.split('\n') if not f.startswith('D') and f.endswith('.css')]
 
-files_to_lint = [f.split('\t').pop() for f in git_result.split('\n') if not f.startswith('D') and f.endswith('.css')]
-
-if len(files_to_lint) == 0:
-	sys.exit(0)
+	if len(files_to_lint) == 0:
+		return 0
 	
-lint_process = open_process('%s --files=%s' % (PATH_TO_LINT_SCRIPT, ','.join(files_to_lint)))
-lint_result = read_process(lint_process)
-close_procces(lint_process)
+	lint_process = open_process('%s --files=%s' % (PATH_TO_LINT_SCRIPT, ','.join(files_to_lint)))
+	lint_result = read_process(lint_process)
+	close_procces(lint_process)
 
-if lint_process.returncode != 0:
-	print lint_result
-	print '\033[91mCommit was rejected\033[0m'
+	if lint_process.returncode != 0:
+		print lint_result
+		print '\033[91mCommit was rejected\033[0m'
 
-sys.exit(lint_process.returncode)
+	return lint_process.returncode
+
+sys.exit(lint())
