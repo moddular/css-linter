@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-PATH_TO_LINT_SCRIPT = '/Library/Projects/css-linter/css.js'
+PATH_TO_LINT_SCRIPT = '/repositories/git/css-linter/css.js'
 
 import sys, subprocess as sp
 
