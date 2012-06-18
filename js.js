@@ -31,7 +31,8 @@ var excluded = [
 	'jmol',
 	'raphael',
 	'yui',
-	'min.js'
+	'min.js',
+	'ie6'
 ];
 
 (function(jshint, finder, fs, reporter) {
