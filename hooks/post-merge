@@ -7,6 +7,9 @@ if not validator.has_valid_branch_point(validator.get_current_branch()):
 	branch_status = 1
 else:
 	branch_status = 0
+	
+if not validator.is_valid_merge():
+	branch_status = 1
 
 if validator.lint() != 0 or branch_status != 0:
 	sys.exit(1)
