@@ -11,8 +11,8 @@ else:
 if not validator.is_valid_merge():
 	branch_status = 1
 
-if validator.lint() != 0 or branch_status != 0:
-	sys.exit(1)
+if branch_status == 0:
+	sys.exit(validator.lint())
 else:
-	sys.exit(0)
+	sys.exit(1)
 

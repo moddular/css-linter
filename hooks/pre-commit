@@ -4,12 +4,8 @@ import sys
 import validator
 
 if not validator.has_valid_branch_point(validator.get_current_branch()):
-	branch_status = 1
+	status = 1
 else:
-	branch_status = 0
+	status = validator.lint()
 
-if validator.lint() != 0 or branch_status != 0:
-	sys.exit(1)
-else:
-	sys.exit(0)
-
+sys.exit(status)

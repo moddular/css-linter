@@ -29,13 +29,15 @@ def run_process(command):
 
 def chastise(message):
 	lines = message.split('\n')
-	line_length = max([len(line) for line in lines])
-	border = '+' + ((line_length + 2) * '-' ) + '+'
+	max_length = max([len(line) for line in lines])
+	border = '\x1b[5m+' + ((max_length + 2) * '-') + '+\x1b[25m'
 
 	print border
 	for line in lines:
-		print '| \033[91m' + line + ((line_length - len(line)) * ' ') + '\033[0m |'
+		print '\x1b[5m|\x1b[25m \033[91m' + line + ((max_length - len(line)) * ' ') + '\033[0m \x1b[5m|\x1b[25m'
 	print border
+	run_process('for i in {1..10}; do say \'Fail\'; done')
+	
 
 
 def lint():
