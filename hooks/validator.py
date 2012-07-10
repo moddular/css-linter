@@ -6,7 +6,7 @@ PATH_TO_LINT_SCRIPT = '/repositories/git/css-linter/css.js'
 ENVIRONMENT_BRANCHES = ['staging', 'test', 'platformdev', 'sandbox']
 
 def open_process(command):
-	return sp.Popen(command, shell=True, stdout=sp.PIPE, executable='/bin/bash')
+	return sp.Popen(command, shell=True, stdout=sp.PIPE)
 
 
 def close_process(process, message='Failed to close subprocess'):
@@ -36,7 +36,7 @@ def chastise(message):
 	for line in lines:
 		print '\x1b[5m|\x1b[25m \033[91m' + line + ((max_length - len(line)) * ' ') + '\033[0m \x1b[5m|\x1b[25m'
 	print border
-	run_process('for i in {1..10}; do say \'Fail\'; done')
+	#run_process('for i in {1..10}; do say \'Fail\'; done')
 	
 
 
@@ -77,21 +77,37 @@ def get_current_branch():
 def has_valid_branch_point(branch):
 	if branch == 'master' or branch in ENVIRONMENT_BRANCHES:
 		return True
-
-	branches = get_branch_list(run_process('git branch'))
-
-	revs_command = "diff -u <(git rev-list --first-parent %s --) <(git rev-list --first-parent %s --) | sed -ne 's/^ //p' | head -1"
-	branch_test_command = 'git branch --contains %s'
-
-	for environment_branch in ENVIRONMENT_BRANCHES:
-		if environment_branch in branches:
-			revision = run_process(revs_command % (branch, environment_branch))
-			branches_with_commit = run_process(branch_test_command % (revision))
-			if not is_master_in_branch_list(branches_with_commit):
-				chastise('It looks like this branch (%s) was NOT branched off master\nThis commit has been rejected\nDO NOT PUSH YOUR REPOSITORY!\nPlease seek help if you don\'t know how to fix this' % (branch))	
-				return False
-
-	return True
+		
+	reflog_pattern = re.compile(r'(?P<rev>[^\s]+).+?branch:\s+Created from\s+(?P<origin>.+)')
+		
+	reflog = run_process('git reflog show %s' % branch).splitlines().pop() # grab the last line from git reflog
+	reflog_fail_message = 'Failing - couldn\'t figure out origin branch from reflog %s' % (reflog)
+	
+	result = False
+	
+	matches = reflog_pattern.search(reflog)
+	if matches:
+		origin = matches.group('origin').strip()
+		if origin == 'HEAD':
+			# reflog doesn't name the branch explicitly, so we'll take it's parent and check if that was in master
+			parent_contained_in = run_process('git branch --contains %s^' % matches.group('rev')) 
+			result = is_master_in_branch_list(parent_contained_in)
+			if not result:
+				print '%s^ was found in the following branches:\n%s' % (matches.group('rev'), parent_contained_in)
+			
+		elif origin == 'refs/remotes/origin/' + branch or origin == 'master':
+			# we got the branch from the remote (assumed to be OK) or we branched off master
+			result = True
+		else:
+			print reflog_fail_message
+	else:
+		print reflog_fail_message
+	
+	if not result:
+		chastise('It looks like this branch (%s) was NOT branched off master\nThis commit has been rejected\nDO NOT PUSH YOUR REPOSITORY!\nPlease seek help if you don\'t know how to fix this' % (branch))	
+	
+	return result
+	
 	
 def is_valid_merge():
 	reflog = run_process('git reflog -n1')
