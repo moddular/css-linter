@@ -79,27 +79,32 @@ def has_valid_branch_point(branch):
 		return True
 		
 	reflog_pattern = re.compile(r'(?P<rev>[^\s]+).+?branch:\s+Created from\s+(?P<origin>.+)')
-		
-	reflog = run_process('git reflog show %s' % branch).splitlines().pop() # grab the last line from git reflog
-	reflog_fail_message = 'Failing - couldn\'t figure out origin branch from reflog %s' % (reflog)
 	
+	# grab the last line from git reflog
+	reflog = run_process('git reflog show %s' % branch).splitlines().pop()
+	reflog_fail_message = 'Couldn\'t figure out origin branch from reflog %s' % (reflog)
+	
+	# assume the branch is invalid
 	result = False
 	
 	matches = reflog_pattern.search(reflog)
 	if matches:
 		origin = matches.group('origin').strip()
 		if origin == 'HEAD':
-			# reflog doesn't name the branch explicitly, so we'll take it's parent and check if that was in master
-			parent_contained_in = run_process('git branch --contains %s^' % matches.group('rev')) 
+			# reflog doesn't name the branch explicitly, so we'll take it's parent and check if that can be found in master
+			parent_contained_in = run_process('git branch --contains %s^' % matches.group('rev'))
 			result = is_master_in_branch_list(parent_contained_in)
 			if not result:
-				print '%s^ was found in the following branches:\n%s' % (matches.group('rev'), parent_contained_in)
+				print 'The branch point %s^ for %s was found in the following branches:\n\n%s\n' % (matches.group('rev'), branch, parent_contained_in)
 			
-		elif origin == 'refs/remotes/origin/' + branch or origin == 'master':
-			# we got the branch from the remote (assumed to be OK) or we branched off master
+		elif origin == 'refs/remotes/origin/' + branch:
+			# we got the branch from the remote (assumed to be OK)
+			result = True
+		elif origin not in ENVIRONMENT_BRANCHES:
+			# the branch was not created from an environment branch
 			result = True
 		else:
-			print reflog_fail_message
+			print '%s was branched from %s' % (branch, origin)
 	else:
 		print reflog_fail_message
 	
