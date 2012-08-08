@@ -162,7 +162,7 @@ var rules = (function() {
 	
 	if (args.files) {
 		paths = args.files.split(',').map(function(val) {
-			return process.cwd() + '/' + val;
+			return val.charAt(0) === '/' ? val : process.cwd() + '/' + val;
 		}).filter(function(path) {
 			return isValidPath(path);
 		});
