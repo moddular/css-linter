@@ -62,8 +62,7 @@ var excluded = [
 							browser: true,
 							jquery: true,
 							wsh: true,
-							nonstandard: true,
-							onecase: true
+							nonstandard: true
 						});
 
 						var data = jshint.JSHINT.data(),
