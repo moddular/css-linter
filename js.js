@@ -5,7 +5,6 @@ var args = (function() {
 	process.argv.slice(2).forEach(function(arg) {
 		if (arg.indexOf('--') === 0) {
 			arg = arg.replace(/^--/, '');
-			
 			if (arg.indexOf('=') > 0) {
 				args[arg.split('=')[0]] = arg.split('=')[1];
 			} else {
@@ -39,7 +38,7 @@ var excluded = [
 	var paths = [],
 		status = 0,
 		count = 0;
-	
+
 	var validate = function() {
 		setTimeout(function() {
 			if (reporter.hasLoaded(paths.length)) {
@@ -58,16 +57,19 @@ var excluded = [
 							/* now suppress some errors */
 							shadow: true,
 							sub: true,
+							scripturl: true,
 							/* environment */
 							browser: true,
 							jquery: true,
-							nonstandard: true
+							wsh: true,
+							nonstandard: true,
+							onecase: true
 						});
-						
+
 						var data = jshint.JSHINT.data(),
 							types = ['closure', 'outer', 'param', 'var'],
 							varNames = {};
-							
+
 						data.functions.forEach(function(fn) {
 							types.forEach(function(type) {
 								if (fn[type] && fn[type].length) {
@@ -96,7 +98,7 @@ var excluded = [
 							}
 							return true;
 						});
-						
+
 						if (invalidVarNames.length) {
 							if (!jshint.JSHINT.errors) {
 								jshint.JSHINT.errors = [];

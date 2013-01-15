@@ -2,7 +2,7 @@
 import re
 import subprocess as sp
 
-PATH_TO_LINT_SCRIPT = '/repositories/git/css-linter/css.js'
+PATH_TO_LINT_SCRIPT = '~/repositories/git/css-linter/css.js'
 ENVIRONMENT_BRANCHES = ['staging', 'test', 'platformdev', 'sandbox']
 
 def open_process(command):
