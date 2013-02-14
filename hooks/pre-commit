@@ -6,6 +6,5 @@ import validator
 if not validator.has_valid_branch_point(validator.get_current_branch()):
 	status = 1
 else:
-	status = validator.lint()
-
+	status = validator.lint() +  validator.js_lint()
 sys.exit(status)

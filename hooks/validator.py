@@ -3,6 +3,7 @@ import re
 import subprocess as sp
 
 PATH_TO_LINT_SCRIPT = '~/repositories/git/css-linter/css.js'
+PATH_TO_JS_LINT_SCRIPT = '~/repositories/git/css-linter/js.js'
 ENVIRONMENT_BRANCHES = ['staging', 'test', 'platformdev', 'sandbox']
 
 def open_process(command):
@@ -56,6 +57,25 @@ def lint():
 		chastise('Failed CSS linting, this commit has been rejected')
 
 	return lint_process.returncode
+
+
+def js_lint():
+	git_result = run_process('git diff --cached --name-status')
+	files_to_lint = [f.split('\t').pop() for f in git_result.split('\n') if not f.startswith('D') and f.endswith('.js')]
+
+	if len(files_to_lint) == 0:
+		return 0
+
+	lint_process = open_process('%s --blame --files=%s' % (PATH_TO_JS_LINT_SCRIPT, ','.join(files_to_lint)))
+	lint_result = read_process(lint_process)
+	close_process(lint_process)
+
+	if lint_process.returncode != 0:
+		print lint_result
+		chastise('Failed JavaScript linting, this commit has been rejected')
+
+	return lint_process.returncode
+
 
 
 def is_master_in_branch_list(results):
