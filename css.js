@@ -171,16 +171,16 @@ var rules = (function() {
 		});
 		validate();
 	} else {
-		finder = finder.find(args.path || process.cwd());
+		var emitter =  finder(args.path || process.cwd());
 		// get a list of all files that don't match the excluded list
-		finder.on('file', function(path) {
+		emitter.on('file', function(path) {
 			if (isValidPath(path)) {
 				paths.push(path);
 				reporter.loadFile(path);
 			}
 		});
-		finder.on('end', validate);
+		emitter.on('end', validate);
 	}
 	
-})(require('csslint').CSSLint, require('findit'), require('fs'), require('./lib/reporter')(args));
+})(require('csslint').CSSLint, require('walkdir'), require('fs'), require('./lib/reporter')(args));
 
