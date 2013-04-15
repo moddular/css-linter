@@ -45,7 +45,7 @@ var defaultRules = {
 	'default-values': IS_WARNING,
 	'empty-rules': IS_ERROR,
 	'errors': IS_ERROR,
-	'fallback-colors': IS_ERROR,
+	'fallback-colors': IS_WARNING,
 	'font-size-should-use-percentages': IS_ERROR,
 	/*'formatting': IS_ERROR,*/
 	'gradients': IS_ERROR,
