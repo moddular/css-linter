@@ -76,6 +76,18 @@ def js_lint():
 
 	return lint_process.returncode
 
+def core_js_concat():
+
+	import os
+	global_js_files = [(x[0], x[2]) for x in os.walk(root_dir)]
+
+
+	filenames = ['file1.txt', 'file2.txt', ...]
+	with open('path/to/output/file', 'w') as outfile:
+	    for fname in filenames:
+	        with open(fname) as infile:
+	            for line in infile:
+	                outfile.write(line)
 
 
 def is_master_in_branch_list(results):
