@@ -44,8 +44,9 @@ def build():
 	build_process = open_process(PATH_TO_BUILD_SCRIPT)
 	build_result = read_process(build_process)
 	close_process(build_process)
-	print "Build process complete"
-	return build_process.returncode
+	if build_process.returncode == 0:
+		print "build successful"
+		return 0
 
 def lint():
 	git_result = run_process('git diff --cached --name-status')
