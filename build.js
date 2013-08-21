@@ -47,11 +47,21 @@ var FILE_ENCODING = 'utf-8',
         });
     };
     var setupConcat = function (outputList, filename) {
-         var fullFileName = "scripts/build/" + filename + "-build.min.js";
-         uglify(outputList, fullFileName)
-         if(fs.existsSync(fullFileName)) {
-            console.log(fullFileName = "built successfully")
-         }
+        var fullFileName = "scripts/build/" + filename + "-build.min.js";
+        var buildDestExists = false;
+        //check if build directory exists, if not create it.
+        if (fs.existsSync('scripts/build')) {
+            buildDestExists = true;
+        } else {
+            fs.mkdirSync('scripts/build');
+            buildDestExists = true;
+        }
+        if (buildDestExists) {
+            uglify(outputList, fullFileName)
+            if (fs.existsSync(fullFileName)) {
+                console.log(fullFileName + "built successfully")
+            }
+        }    
     };
 
     var lineMatcher = function (line) {
@@ -111,8 +121,8 @@ var FILE_ENCODING = 'utf-8',
                 setupConcat(matchedArray, filePath.level)
             }
 
-        });
-        process.exit(0)
+        }); 
+        process.exit("build successful")
         
     };
 
