@@ -44,7 +44,6 @@ def build():
 	build_process = open_process(PATH_TO_BUILD_SCRIPT)
 	build_result = read_process(build_process)
 	close_process(build_process)
-	print "Build process complete"
 	return build_process.returncode
 
 def lint():

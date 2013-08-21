@@ -47,7 +47,11 @@ var FILE_ENCODING = 'utf-8',
         });
     };
     var setupConcat = function (outputList, filename) {
-         uglify(outputList, "scripts/build/" + filename + "-build.min.js")
+         var fullFileName = "scripts/build/" + filename + "-build.min.js";
+         uglify(outputList, fullFileName)
+         if(fs.existsSync(fullFileName)) {
+            console.log(fullFileName = "built successfully")
+         }
     };
 
     var lineMatcher = function (line) {
