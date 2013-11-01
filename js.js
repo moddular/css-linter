@@ -34,6 +34,11 @@ var excluded = [
 	'ie6'
 ];
 
+//ignore varnames we don't have control over
+var excludedVarNames = {
+	'uglifyJS': true
+};
+
 (function(jshint, finder, fs, reporter) {
 	var paths = [],
 		status = 0,
@@ -44,6 +49,11 @@ var excluded = [
 			if (reporter.hasLoaded(paths.length)) {
 				paths.map(function(path) {
 					fs.readFile(path, 'utf-8', function(err, data) {
+						
+						// sniff for an environment hint on the first non-empty line
+						var rx = /^[\s\n\r]*[^\n\r]*\b(node|phantom)\b/g;
+						envhint = (null !== (rxRes = rx.exec(data))) ? rxRes[1] : null;
+						
 						jshint.JSHINT(data, {
 							curly: true,
 							eqeqeq: true,
@@ -61,6 +71,8 @@ var excluded = [
 							/* environment */
 							browser: true,
 							jquery: true,
+							node: ('node' === envhint),
+							// phantom: ('phantom' === envhint), // doesn't seem to understand 'phantom' in node v0.10.18
 							wsh: true,
 							nonstandard: true
 						});
@@ -87,7 +99,7 @@ var excluded = [
 								return false;
 							}
 							if (name.match(/[A-Z]{2,}/)) { // disallow someHTML should be someHtml
-								return true;
+								return (true !== excludedVarNames[name]) ? true : false;
 							}
 							if (name.match(/^_?\$?[a-z][a-zA-Z0-9]*$/)) { // $myVar, myVar, _myVar or _$myVar
 								return false;
