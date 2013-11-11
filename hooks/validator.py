@@ -4,7 +4,6 @@ import subprocess as sp
 
 PATH_TO_LINT_SCRIPT = '~/repositories/git/css-linter/css.js'
 PATH_TO_JS_LINT_SCRIPT = '~/repositories/git/css-linter/js.js'
-PATH_TO_BUILD_SCRIPT = '~/repositories/git/css-linter/build.js'
 ENVIRONMENT_BRANCHES = ['staging', 'test', 'platformdev', 'sandbox']
 
 def open_process(command):
@@ -39,14 +38,7 @@ def chastise(message):
 		print '\x1b[5m|\x1b[25m \033[91m' + line + ((max_length - len(line)) * ' ') + '\033[0m \x1b[5m|\x1b[25m'
 	print border
 	#run_process('for i in {1..10}; do say \'Fail\'; done')
-	
-def build():
-	build_process = open_process(PATH_TO_BUILD_SCRIPT)
-	build_result = read_process(build_process)
-	close_process(build_process)
-	if build_process.returncode == 0:
-		print "build successful"
-		return 0
+
 
 def lint():
 	git_result = run_process('git diff --cached --name-status')
@@ -84,12 +76,12 @@ def js_lint():
 	return lint_process.returncode
 
 
+
 def is_master_in_branch_list(results):
 	for branch in get_branch_list(results):
 		if branch == 'master':
 			return True
 	return False
-
 
 
 def get_branch_list(results):

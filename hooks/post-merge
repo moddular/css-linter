@@ -3,8 +3,6 @@
 import sys
 import validator
 
-BRANCHES_WITH_BUILD = ['master', 'staging', 'platformdev']
-
 if not validator.has_valid_branch_point(validator.get_current_branch()):
 	branch_status = 1
 else:
@@ -14,10 +12,7 @@ if not validator.is_valid_merge():
 	branch_status = 1
 
 if branch_status == 0:
-	print 'Merging to ' + validator.get_current_branch()
-	if validator.get_current_branch() in BRANCHES_WITH_BUILD:
-		sys.exit(validator.lint() + validator.js_lint() + validator.build())
-
+	sys.exit(validator.lint() + validator.js_lint())
 else:
 	sys.exit(1)
 
