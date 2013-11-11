@@ -39,7 +39,6 @@ def chastise(message):
 	print border
 	#run_process('for i in {1..10}; do say \'Fail\'; done')
 
-
 def lint():
 	git_result = run_process('git diff --cached --name-status')
 	files_to_lint = [f.split('\t').pop() for f in git_result.split('\n') if not f.startswith('D') and f.endswith('.css')]
