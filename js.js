@@ -28,6 +28,7 @@ var excluded = [
 	'swfobject',
 	'WriteCapture',
 	'jmol',
+	'jsmol',
 	'raphael',
 	'yui',
 	'min.js',
