@@ -29,7 +29,8 @@ var excluded = [
 	'css/commons',
 	'greenfield',
 	'yui.css',
-	'reset.css'
+	'reset.css',
+	'.lib.css'
 ];
 
 var IS_WARNING = 1;
