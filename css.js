@@ -30,7 +30,7 @@ var excluded = [
 	'greenfield',
 	'yui.css',
 	'reset.css',
-	'.lib.css'
+	'min.css'
 ];
 
 var IS_WARNING = 1;
